@@ -36,6 +36,15 @@ LAB SETUP INSTRUCTIONS
  *     const app = express();
  *     app.listen(3000, ()=> console.log(...));
  * 
+   * TODO-2 (Server Setup):
+ * ============================================
+ *   - create Express app instance
+ *   - start server on port 3000
+ *   - show console.log("API running at http://localhost:3000")
+ *   HINT: 
+ *     const app = express();
+ *     app.listen(3000, ()=> console.log(...));
+ * 
  *============================================
  * TODO-2 (/echo route):
  * ============================================
@@ -123,4 +132,44 @@ const app = express();
 // Route params: /users/:userId route
 
 
+// Root route
+app.get("/", (req, res) => {
+  res.json({ ok: true, msg: "Express API is up" });
+});
 
+// GET /echo route
+app.get("/echo", (req, res) => {
+  const { name, age} = req.query;
+  if (!name || !age) {
+    return res.status(400).json({ ok: false, error: "name & age required" });
+  }
+  res.json({ ok: true, name, age, msg: `Hello ${name}, you are ${age}` });
+});
+
+// GET /profile/:first/:last route
+app.get("/profile/:first/:last", (req, res) => {
+  const { first, last } = req.params;
+  res.json({ ok: true, fullName: `${first} ${last}` })
+});
+
+// app.param middleware for userId
+app.param("userId", (req, res, next, userId) => {
+  const n = Number(userId);
+  if (!Number.isFinite(n) || n <= 0) {
+    return res
+      .status(400)
+      .json({ ok: false, error: "userId must be positive number" });
+  }
+  req.userIdNum = n;
+  next();
+});
+
+// GET /users/:userId route
+app.get("/users/:userId", (req, res) => {
+  res.json({ ok: true, userId: req.userIdNum });
+});
+
+// Start the server
+app.listen(3000, () => {
+  console.log("API running at http://localhost:3000");
+});
